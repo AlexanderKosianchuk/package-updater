@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "scripts": {
-    "start": "ts-node index.ts ",
+    "start": "ts-node index.ts",
     "lint": "eslint '**/*.ts'",
     "test": "jest"
   },

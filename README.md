@@ -1,4 +1,4 @@
-# package-updater
+# Package Updater
 
 This project checks you repo package.json file
 and updates version of selected lib.
@@ -8,8 +8,8 @@ To run:
 npm run start
 ```
 
-in `/constants/clients.ts` there are clients configs
-with example config for bitbucket, please change it for other repos
+in `/constants/clients.ts` there are clients (eg bitbucket) with configs.
+Example config for bitbucket, please change it for other repos
 
 ```
 repoSlug: 'supper-project',
