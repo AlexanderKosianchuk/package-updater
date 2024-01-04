@@ -1,40 +1,33 @@
-import GitClient from './components/GitClient';
+import RepoClient from './components/RepoClient'
+import FileParser from './components/FileParser'
+import Interviewer from './components/Interviewer'
 import clients from './constants/clients'
-import isJson from './utils/isJson'
-
-const TOKEN = 'ATCTT3xFfGN0IoSM8zETAGrblVUMUebmAs82cTng0or0AT-cGhswdiXY6-QmpGKUUOh3_JMx_JiiYwkfavA5DHUtsFzs9RsRBrJPaOHyys17aXW504s-lRUfcatcQWQN9vCnwJRGdiLSpj92Bp6vs8NxVUo7GKaYHdivzzVXJ_IXDwJOn8NA4yo=C2CA8952';
-const lib = 'typescript'
-const ver = '1.17';
 
 (async () => {
   try {
-    const client = new GitClient(clients.bitbucket, TOKEN)
+    // ask user lib name and version to update 
+    const { lib, ver } = await Interviewer.getDescription()
+
+    // create client to work with remote repo
+    const client = new RepoClient(clients.bitbucket)
+
+    // get main branch to checkout from it and to make pull request in it
     const sourceBranch = await client.getMainBranch()
 
-    if (!sourceBranch) {
-      throw Error(`No main branch`)
-    }
-
+    // get file to update
     const file = await client.getFile(sourceBranch)
 
-    if (!file || !isJson(file)) {
-      throw Error(`No expected file in branch or invalid format`)
-    }
-    
-    const regex = new RegExp(`"${lib}": "([^"]+)"`, 'g');
-    const modifiedText = file.replace(regex, `"${lib}": "${ver}"`);
+    // update libs verions in file
+    const fileProccessed = FileParser.proccess(file, lib, ver)
 
-    const commitRes = await client.createBranchWithCommit(modifiedText, ver)
-    
-    if (!commitRes?.branch) {
-      throw Error(`Invalid new branch name`)
-    }
+    // create commit with processed file
+    const { branch: targetBranch } = await client.createBranchWithCommit(fileProccessed, ver)
 
-    const targetBranch = commitRes.branch
+    // create pull request to sourceBranch
     await client.createPullRequest(targetBranch, sourceBranch)
 
     console.log(`Version in ${lib} updated to ${ver}. Pull request created`)
-  } catch (e) {
-    console.error('Execution error', e)
+  } catch (e: any) {
+    console.error('Runtime error: ', e?.message)
   }
 })()
